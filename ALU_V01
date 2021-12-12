@@ -1,0 +1,97 @@
+Name      ALU;
+Partno    AJC02;
+Date      08/10/1999;
+Rev       01;
+Designer  AaronJClimas;
+Company   UNIT;
+Assembly  None;
+Location  None;
+Device    g22v10;
+
+/****************************************************************/
+/*                                                              */
+/* 				PROJECT V01				  */
+/*                                                              */
+/*               							  */
+/****************************************************************/
+
+/* ************************ FUNCTIONS ********************************/ 
+/*OPPERATION 	DESCRIPTION 			  OPCODE		FORMULA
+/* ADD		Add with cary 		      0000		  Y = A + B		*/
+/* ADC		Add without cary 		    0001		  Y = A + B + C		*/
+/* SUB		Subtract witout borrow	0010		  Y = A + !B + 1	*/
+/* SBB		Subtract with borrow		0011		  Y = A + !B + !C	*/
+/* INC		Increment          		  0100	  	Y = A + 1		*/
+/* DEC		Decrement        		    0101	  	Y = A + !1 + 1	*/
+/* NOT		NOT 		 		            0110	   	Y = !A			*/
+/* OR		  OR		 		              0111	  	Y = A # B		*/
+/* AND		AND 		 		            1000	  	Y = A & B		*/
+/* XOR		XOR		 		              1001	  	Y = A $ B		*/
+/* LSR		Logical Shift Right		  1010	  	Y = A >>		*/
+/* LSL		Logical Shift Left		  1011	  	Y = A <<		*/
+/* ASR		Arythmic Shift Right		1100		  Y = A >>>		*/
+/* ASL		Arythmic Shift Left		  1101	  	Y = A <<<		*/
+/*	Spare.	 				1110					*/
+/*	Spare	 				  1111					*/
+
+/* ***************** INPUT PINS ************************/
+
+Pin 1 = !OE; 				/* Output enable */
+Pin [2..5] = [A1..4];           	/* First 4-bit number   */
+Pin [6..9] = [B1..4];           	/* Second 4-bit number  */
+Pin [10,11,13,14] = [OP1..4];	/* Opcode binary for modes */
+Pin 15 = Cin;				/* Carry in. */
+
+/* ***************** OUTPUT PINS ************************/
+
+Pin [20..23] = [Y1..4];         	/* 4-bit sum                    	*/
+Pin 19 = Cout;                 	/* Carry Out for 4-bit sum          	*/
+Pin 18 = Zero;			/* If result is zero. 		*/
+Pin 17 = Neg;				/* If result is negative 		*/
+Pin 16 = Overflow; 			/* Overflow.				*/
+
+/* Fields! */
+Field OpCode 	= [OP1..4];
+Field Output 	= [Y1, Y2, Y3, Y4, Cout];
+
+
+/******************* EQUATIONS *******************/
+Output.d  =  [A1 + B1, A2 + B2, A3 + B3, A4 + B4, Cout] 	    &  OpCode:0		  /* ADD		Add with cary 		      Y = A + B		*/
+          #  [A1 + B1, A2 + B2, A3 + B3, A4 + B4, Cout]   	  &  OpCode:1		  /* ADC		Add without cary 		    Y = A + B + C		*/
+          #  [A1 - B1, A2 - B2, A3 - B3, A4 - B4, Cout]       &  OpCode:2		  /* SUB		Subtract witout borrow	Y = A + !B + 1	*/
+          #  [A1 - B1, A2 - B2, A3 - B3, A4 - B4, Cout]   	  &  OpCode:3		  /* SBB		Subtract with borrow		Y = A + !B + !C	*/
+          #  [A1+1, A2, A3, A4, Cout]  	 			                &  OpCode:4		  /* INC		Increment          		  Y = A + 1		*/
+          #  [A1-1, A2, A3, A4, Cout]  	 			                &  OpCode:5		  /* DEC		Decrement        		    Y = A + !1 + 1	*/
+          #  [!A1, !A2, !A3, !A4, 0]  	 			                &  OpCode:6		  /* NOT		NOT 		 		            Y = !A			*/
+          #  [A1 # B1, A2 # B2, A3 # B3, A4 # B4, 0]  	      &  OpCode:7		  /* OR		  OR		 		              Y = A # B		*/
+          #  [A1 & B1, A2 & B2, A3 & B3, A4 & B4, 0]  	      &  OpCode:8		  /* AND		AND 		 		            Y = A & B		*/
+          #  [A1 $ B1, A2 $ B2, A3 $ B3, A4 $ B4, 0]  	      &  OpCode:9		  /* XOR		XOR		 		              Y = A $ B		*/
+          #  [Cin, A1, A2, A3, 0] 				                    &  OpCode:10		/* LSR		Logical Shift Right		  Y = A >>		*/
+          #  [A2, A3, A4, Cin, 0] 				                    &  OpCode:11		/* LSL		Logical Shift Left		  Y = A <<		*/
+          #  [Cin # A1, A1, A2, A3, A4]  			                &  OpCode:12		/* ASR		Arythmic Shift Right		Y = A >>>		*/
+          #  [A1, A1, A2, A3, A4]                             &  OpCode:13		/* ASL		Arythmic Shift Left		  Y = A <<<		*/
+          #  [A1, A2, A3, A4, 0]                              &  OpCode:14		/*	Spare. A pass through	 				*/
+          #  [B1, B2, B3, B4, 0]                              &  OpCode:15		/*	Spare	B pass through 					*/
+
+output.oe = OE;         /* tri-state control            */
+
+Zero = ![Y1, Y2, Y3, Y4]$ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
